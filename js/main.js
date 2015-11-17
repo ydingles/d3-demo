@@ -1,6 +1,9 @@
 /* Create a scatter plot of 1960 life expectancy (le_1960) versus 2013 life expectancy (le_2013). 
 		The variable "data" is accessible to you, as you read it in from data.js
 */
+var xScale;
+var yScale;
+
 $(function() {
  // SVG to work with.  The vis <div> is defined in HTML
 	var svg = d3.select('#vis')
@@ -29,9 +32,13 @@ $(function() {
 	// Write a function to set your scales
 	var setScales = function() {
 		// xScale
-		
-
-		// yScale		
+        var xMin = d3.min(data, function(d){return d.le_1960})
+		var xMax = d3.max(data, function(d){return d.le_1960})
+        xScale = d3.scale.linear().domain([xMin, xMax]).range([0,width])
+		// yScale
+        var yMin = d3.min(data, function(d){return d.le_2013})
+        var yMax = d3.max(data, function(d){return d.le_2013})
+        yScale = d3.scale.linear().domain([yMin, yMax]).range([height, 0])		
 	}
 
 	/* Write a function to define the positioning of your circles
@@ -40,34 +47,36 @@ $(function() {
 		- title attribute as the country of the object
 	*/
 	var circleFunc = function(circle) {
-		
-
-
-	}
+        circle.attr('cx', function(d) {return xScale(d.le_1960)})
+              .attr('cy', function(d) {return yScale(d.le_2013)})
+              .attr('r', 15)
+              .style('opacity', .5)
+              .attr('title', function(d) {return d.country})
+    }
 
 	// Write a reusable drawing function for circles
 	var draw = function(data) {
 		// Set Scales
-		
-		
+        setScales();
+	
 		// Select all circles and bind your data to them
-		
+		var circles = svg.selectAll('cicle').data(data)
 	
 		// Use the .enter() method to get your entering elements, and then position them using your positioning function
-    	
+    	circles.enter().append('circle').call(circleFunc) 
 	
   
 	    // Use the .exit() and .remove() methods to remove elements that are no longer in the data
-		
+		circles.exit().remove()
 	  
 	    // Select all circle elements within your g and transition their position using your positioning function
-		
-
-	
+		svg.selectAll('circle').transition().duration(500).call(circleFunc)	
 	}
 
 	// Pass data to your drawing function
-	
+	draw(data);
+
+    
 
 	// Define x axis using d3.svg.axis(), assigning the scale as the xScale
 	
